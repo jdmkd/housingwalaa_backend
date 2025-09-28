@@ -1,23 +1,44 @@
 from django.db import models
+from django.utils.text import slugify
 from accounts.models import User
 from locations.models import Location
+
+class Amenity(models.Model):
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=200, null=True, blank=True)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    # properties = models.ManyToManyField(Property, related_name="amenities", blank=True)
+
+    def __str__(self):
+        return f"{self.category} - {self.name}"
+        # return f"{self.name} ({self.category})" if self.category else self.name
+
 
 class Property(models.Model):
     PROPERTY_TYPES = [("RESIDENTIAL", "Residential"), ("COMMERCIAL", "Commercial"), ("PLOT", "Plot")]
     STATUS_CHOICES = [("UNDER_CONSTRUCTION", "Under Construction"), ("READY", "Ready to Move"), ("UPCOMING", "Upcoming")]
 
     title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
     property_type = models.CharField(max_length=30, choices=PROPERTY_TYPES)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="properties")
     listed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listed_properties")
+    # amenities = models.ManyToManyField(Amenity, related_name="properties", blank=True)
+    amenities = models.ManyToManyField("Amenity", related_name="properties", blank=True)
+
     possession_date = models.DateField(null=True, blank=True)
     rera_number = models.CharField(max_length=100, null=True, blank=True)
     price_min = models.DecimalField(max_digits=15, decimal_places=2)
     price_max = models.DecimalField(max_digits=15, decimal_places=2)
     is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -28,7 +49,7 @@ class PropertyMedia(models.Model):
 
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="media")
     media_type = models.CharField(max_length=20, choices=MEDIA_TYPES)
-    file = models.ImageField(upload_to="property/media/", null=True, blank=True)
+    file = models.ImageField(upload_to="housingwalaa/property/media/", null=True, blank=True)
     video_url = models.URLField(null=True, blank=True)
     is_primary = models.BooleanField(default=False)
 
@@ -45,14 +66,6 @@ class UnitPlan(models.Model):
     def __str__(self):
         return f"{self.unit_type} - {self.property.title}"
 
-
-class Amenity(models.Model):
-    name = models.CharField(max_length=100)
-    icon = models.CharField(max_length=200, null=True, blank=True)
-    properties = models.ManyToManyField(Property, related_name="amenities", blank=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Specification(models.Model):

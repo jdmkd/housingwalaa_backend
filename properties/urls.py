@@ -3,11 +3,11 @@ from rest_framework.routers import DefaultRouter
 from .views import PropertyViewSet, PropertyMediaViewSet, UnitPlanViewSet, AmenityViewSet, SpecificationViewSet
 
 router = DefaultRouter()
-router.register("properties", PropertyViewSet)
-router.register("media", PropertyMediaViewSet)
-router.register("units", UnitPlanViewSet)
-router.register("amenities", AmenityViewSet)
-router.register("specifications", SpecificationViewSet)
+router.register(r"", PropertyViewSet, basename="property")
+router.register("media", PropertyMediaViewSet, basename="property-media")
+router.register("units", UnitPlanViewSet, basename="unit-plan")
+router.register("amenities", AmenityViewSet, basename="amenity")
+router.register("specifications", SpecificationViewSet, basename="specification")
 
 urlpatterns = [
     path("", include(router.urls)),
