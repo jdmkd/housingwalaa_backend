@@ -214,6 +214,15 @@ class LoginView(generics.GenericAPIView):
             samesite="None",
             max_age=60 * 60 * 24 * 7,  # 7 days
         )
+        response.set_cookie(
+            key="session_exists",
+            value="true",  # signed on server optionally
+            httponly=False,  # readable by JS
+            secure=True,
+            samesite="None",
+            max_age=60 * 15,  # 15 min
+        )
+
         return response
 
 
@@ -230,7 +239,8 @@ class LogoutView(APIView):
         # response.delete_cookie("access_token")
         response.delete_cookie("access_token", path="/", samesite="None")
         response.delete_cookie("refresh_token", path='/', samesite="None")
-        
+        response.delete_cookie("session_exists", path='/', samesite="None")
+
         return response
 
 
@@ -267,9 +277,18 @@ class CookieTokenRefreshView(TokenRefreshView):
             access_token,
             httponly=True,
             secure=True,
-            # samesite="None",
+            samesite="None",
             max_age=60 * 5
         )
+        response.set_cookie(
+            "session_exists",
+            "true",
+            httponly=False,
+            secure=True,
+            samesite="None",
+            max_age=60*15
+        )
+
         return response
 
     

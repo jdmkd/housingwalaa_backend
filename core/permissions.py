@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-class IsAuthenticatedOrReadOnlyForPOST(permissions.BasePermission):
+class IsAuthenticatedOrReadOnly(permissions.BasePermission):
     """
     Allow anyone to read (GET, HEAD, OPTIONS),
     but only authenticated users can POST/PUT/DELETE.
